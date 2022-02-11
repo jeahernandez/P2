@@ -9,11 +9,10 @@ CFLAGS += -g
 all: $(lib)
 
 $(lib): $(objs)
- 	ar rcs $(lib) $(objs)
- 	#https://stackoverflow.com/questions/11344547/how-do-i-compile-a-static-library
+	ar rcs $(lib) $(objs)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-    rm -f $(lib) $(objs)
+	rm -f $(lib) $(objs)
