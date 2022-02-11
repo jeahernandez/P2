@@ -56,10 +56,10 @@ int uthread_create(uthread_func_t func)
 {
 
     tcb_t* newThread = (tcb_t*) malloc(sizeof(tcb_t));
-    newThread->tid = ;
+    newThread->tid = 0;
 
     // initializing the thread's execution context
-    //uthread_ctx_init(runningThread->context, runningThread->stack, func);
+    uthread_ctx_init(runningThread->context, runningThread->stack, func);
 
     runningThread = (tcb_t*) malloc(sizeof(tcb_t));
 	return -1;
@@ -77,12 +77,13 @@ uthread_t uthread_self(void)
 
 void uthread_exit(int retval)
 {
-	/* TODO */
+	retval++;
 }
 
 int uthread_join(uthread_t tid, int *retval)
 {
-	/* TODO */
+	runningThread->tid = tid;
+    retval ++;
 	return -1;
 }
 
