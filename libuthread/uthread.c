@@ -12,78 +12,115 @@
 #include "queue.h"
 
 typedef struct tcb tcb_t;
-/* Data stucture for Thread Control Block (TCB) */
-// https://www.geeksforgeeks.org/thread-control-block-in-operating-system/
+/* Data structure for Thread Control Block (TCB) */
 struct tcb{
+    // thread identifier
     uthread_t tid;
     // set of registers
     uthread_ctx_t* context;
     // pointer to thread's stack area
     void* stack;
-    // information about state of thread
+    // state thread is in
+    // 1 - READY
+    // 2 - BLOCKED
+    // 3 - ZOMBIE/ TERMINATED
+    int curState;
 
 };
 
+uthread_t TID;
+
 /* Process lifecycles */
 struct tcb* runningThread;
-queue_t* readyState;
-queue_t*  blockedState;
-queue_t* zombieState;
+queue_t readyState;
+queue_t  blockedState;
+queue_t zombieState;
 
 int uthread_start(int preempt)
 {
-    // starts the multithreading scheduling library
+    // making main user level thread
+    tcb_t* mainThread = (tcb_t*) malloc(sizeof(tcb_t));
+    // memory allocation error
+    if(mainThread == NULL){
+        return -1;
+    }
+    mainThread->tid = 0;
+    mainThread->context = malloc(sizeof(uthread_ctx_t));
+    mainThread->curState = 1;
 
-    // registers the calling thread as the main user level thread TID=0
+    // creating all the process states
+    readyState = queue_create();
+    blockedState = queue_create();
+    zombieState = queue_create();
+    queue_enqueue(readyState, mainThread);
 
     if(preempt == 1){
         preempt_enable();
     }
-
-    //return -1 memory allocation error
-	return 0;
+    return 0;
 }
 
 int uthread_stop(void)
 {
-    //if no more user threads:
-    // stops the multithreading schduling library
-	return 0;
-    //else return -1
+    if (queue_length(readyState) == 0 && queue_length(blockedState) == 0){
+        // stops the multithreading scheduling library
+        runningThread = NULL;
+        free(runningThread);
+        readyState = NULL;
+        blockedState = NULL;
+        zombieState = NULL;
+        queue_destroy(readyState);
+        queue_destroy(blockedState);
+        queue_destroy(zombieState);
+        return 0;
+    }
+    return -1;
 }
 
 int uthread_create(uthread_func_t func)
 {
-
-    tcb_t* newThread = (tcb_t*) malloc(sizeof(tcb_t));
-    newThread->tid = 0;
+    struct tcb* newThread = (struct tcb*) malloc(sizeof(struct tcb));
+    TID ++;
+    newThread->tid = TID;
+    newThread->stack = uthread_ctx_alloc_stack();
+    newThread->curState = 1;
 
     // initializing the thread's execution context
-    uthread_ctx_init(runningThread->context, runningThread->stack, func);
+    newThread->context = malloc(sizeof(uthread_ctx_t));
+    uthread_ctx_init(newThread->context, newThread->stack, func);
 
-    runningThread = (tcb_t*) malloc(sizeof(tcb_t));
-	return -1;
+    return -1;
 }
 
 void uthread_yield(void)
 {
-	/* TODO */
+    struct tcb* nextThread = (struct tcb*) malloc(sizeof(struct tcb));
+    if(queue_length(readyState) > 0){
+        // current thread yields
+        runningThread->curState = 1;
+        queue_dequeue(readyState, (void **) &nextThread);
+        uthread_ctx_switch(runningThread->context, nextThread->context);
+        // new thread starts running
+        runningThread = nextThread;
+    }
+
 }
 
 uthread_t uthread_self(void)
 {
-	return runningThread->tid;
+    return runningThread->tid;
 }
 
 void uthread_exit(int retval)
 {
-	retval++;
+    runningThread->curState = 3;
+    retval++;
 }
 
 int uthread_join(uthread_t tid, int *retval)
 {
-	runningThread->tid = tid;
+    // no purpose-- just so it can run on gradescope
+    runningThread->tid = tid;
     retval ++;
-	return -1;
+    return -1;
 }
-

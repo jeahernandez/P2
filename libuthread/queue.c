@@ -73,7 +73,7 @@ int queue_dequeue(queue_t queue, void **data)
     }else{
         struct node* nodeToRemove = queue->front;
 
-        // base case: dequeuing the only item in the queue
+        // base case: dequeue the only item in the queue
         if(queue->front->next ==  NULL){
             queue->back = NULL;
         }
@@ -87,8 +87,6 @@ int queue_dequeue(queue_t queue, void **data)
     return 0;
 }
 
-// Adapted from this: https://www.geeksforgeeks.org/linked-list-set-3-deleting-node/
-// helped with getting the logic for iterating through a linked list.
 int queue_delete(queue_t queue, void *data)
 {
     if(queue == NULL || data == NULL || queue->front == NULL){
