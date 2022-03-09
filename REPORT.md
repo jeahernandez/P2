@@ -80,10 +80,3 @@ wes released at the apprpriate times. The biggest thing that had to be managed
 was making sure the threads were going to the right stages of the lifecyle of a
 process and making sure we didn't accidently move a thread away from the flow
 they needed to follow.
-
-## License
-
-This work is distributed under the [GNU All-Permissive
-License](https://spdx.org/licenses/FSFAP.html).
-
-Copyright 2022, Priyanshi Nigam and Jennifer Hernandez
